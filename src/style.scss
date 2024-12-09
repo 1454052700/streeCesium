@@ -1,0 +1,99 @@
+:root,
+body,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+textarea {
+  resize: none !important;
+}
+
+// 级联下拉框单选 文字选中样式
+.selectArea {
+  .el-radio {
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    position: absolute;
+    right: 0;
+  }
+
+  .is-disabled {
+    // 不允许选中样式
+    cursor: not-allowed;
+  }
+
+  .el-radio__input {
+    visibility: hidden;
+  }
+}
+
+// 上传图片
+.company-img {
+  position: relative;
+  cursor: pointer;
+  width: 64px;
+  height: 54px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-bottom: 0px !important;
+  border-radius: 2px;
+
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.company-dialog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  // background: rgb(75, 76, 77);
+  border: 1px solid rgb(105, 117, 137);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 2px;
+
+  .el-icon {
+    cursor: pointer;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 16px;
+    color: red;
+  }
+}
+
+.urbanUploadImgs {
+  width: 64px;
+  height: 54px;
+  border-radius: 2px;
+  background: rgb(75, 76, 77);
+  border: 1px solid rgb(105, 117, 137);
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center !important;
+  cursor: pointer;
+  box-sizing: border-box;
+
+  .el-upload-list__item-info {
+    display: none !important;
+  }
+
+  .el-upload {
+    width: 100%;
+    height: 100%;
+    justify-content: center !important;
+  }
+}
+
+.company-imgs {
+  display: flex;
+}

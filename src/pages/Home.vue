@@ -93,18 +93,18 @@
             <p class="label">平移（米）：</p>
             <div class="item">
                 <p>X</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationX" :step="0.5"
-                    @input="handleChange($event, 1)" />
+                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationX"
+                    :step="0.5" @input="handleChange($event, 1)" />
             </div>
             <div class="item">
                 <p>Y</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationY" :step="0.5"
-                    @input="handleChange($event, 2)" />
+                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationY"
+                    :step="0.5" @input="handleChange($event, 2)" />
             </div>
             <div class="item">
                 <p>Z</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationZ" :step="0.5"
-                    @input="handleChange($event, 3)" />
+                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationZ"
+                    :step="0.5" @input="handleChange($event, 3)" />
             </div>
             <p class="label">旋转（度）：</p>
             <div class="item">
@@ -141,6 +141,7 @@
                             :style="roadInfo?.id == item.id ? 'background-color: var(--el-color-primary);' : ''"
                             v-for="(item, index) in tableData_load" :key="index">
                             <span>{{ index + 1 }}</span>
+                            <!-- {{ 'k' + (index + 25) }} -->
                             <span>{{ 'k' + (index + 25) }}</span>
                             <span
                                 :style="!item.status ? 'color:#909399' : (item.status == 1 ? 'color:#E6A23C' : 'color:#67C23A')">{{
@@ -381,10 +382,10 @@
                                     {{ $t('lang.line') }}{{ index2 + 1 }}：{{ item2.number }}m
                                     （{{ $t('lang.longitude') }}：{{ (item2.poi1[0].toFixed(8)) }}，{{ $t('lang.latitude')
                                     }}：{{
-                                    (item2.poi1[1].toFixed(8)) }}）->
+                                        (item2.poi1[1].toFixed(8)) }}）->
                                     （{{ $t('lang.longitude') }}：{{ (item2.poi2[0].toFixed(8)) }}，{{ $t('lang.latitude')
                                     }}：{{
-                                    (item2.poi2[1].toFixed(8)) }}）
+                                        (item2.poi2[1].toFixed(8)) }}）
                                 </em>
                             </span>
                             <span
@@ -2009,7 +2010,7 @@ const initCesium = () => {
             // scenceSucShow.value = false;
             // }, 3000)
             getDbShow(true);//地标
-            changMap(true);//切换地图
+            // changMap(true);//切换地图
             // Web3DUtils.cesiumUtils.openTranslucency(true);//地下
             Web3DUtils.cesiumUtils.init3dtilesetJSON();
             getRoadList();

@@ -1003,15 +1003,15 @@ export class CesiumUtils {
             } else {
                 color = newColor;
             }
-            if (tileset && tileset.name?.indexOf('road') != -1) {
-                tileset.style = new Cesium.Cesium3DTileStyle({
-                    color: {
-                        conditions: [
-                            ["${id} === " + "'" + val.id + "'", (show ? color : defaultColor)],
-                            ["true", defaultColor],
-                        ],
-                    },
-                });
+            if (tileset && tileset.name == 'road') {
+                // tileset.style = new Cesium.Cesium3DTileStyle({
+                //     color: {
+                //         conditions: [
+                //             ["${id} === " + "'" + val.id + "'", (show ? color : defaultColor)],
+                //             ["true", defaultColor],
+                //         ],
+                //     },
+                // });
                 if (val.sphere && show) {
                     let center = new Cesium.Cartesian3(val.sphere[0], val.sphere[1], val.sphere[2]);
                     const degrees = this.jesium.coordUtils.cato2Lat(Cesium.Cartographic.fromCartesian(center));
@@ -1080,6 +1080,11 @@ export class CesiumUtils {
 
         // 112.789675,23.103256
 
+        // 112.427171,22.996361
+        // 112.690468,23.071807
+
+        // 九山：112.565016,23.01549
+
         var point1: any = turf.point([112.42059906, 22.99940059]);
         var point2: any = turf.point([112.64468422, 23.05941131]);
 
@@ -1111,12 +1116,11 @@ export class CesiumUtils {
             },
             //贴纹理
             //顶点着色器
-            //将法向量从顶点着色器设置变量传给片元着色器
-            vertexShaderText: `
-                void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
-                      v_normalMC = vsInput.attributes.normalMC;
-                      v_st=vsInput.attributes.positionMC;   
-                }`,
+            // vertexShaderText: `
+            //     void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
+            //           v_normalMC = vsInput.attributes.normalMC;
+            //           v_st=vsInput.attributes.positionMC;   
+            //     }`,
             //片元着色器
             fragmentShaderText: `
                void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
@@ -1167,11 +1171,34 @@ export class CesiumUtils {
         // var position: any = Cesium.Cartesian3.fromDegrees(Number(112.44304333), Number(22.99698513));
         // console.log(position, 'positon')
         this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road/tileset.json', 'road', false));
+        this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road2/tileset.json', 'road2', false));
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
-            tileset.customShader = customShader;//纹理
-            console.log(customShader, 'customShader')
-            if (tileset && tileset.name?.indexOf('road') != -1) {
+
+            // tileset.customShader = customShader;//纹理
+            // console.log(customShader, 'customShader')
+
+            if (tileset && tileset.name == 'road2') {
+                tileset.tileLoad.addEventListener((tile: any) => {
+                    let content = tile.content;
+                    if (content && content.featuresLength > 0) {
+                        const featuresLength = content.featuresLength;
+                        for (let i = 0; i < featuresLength; ++i) {
+                            const feature = content.getFeature(i);
+                            let id = feature.getProperty("id");
+                            feature.show = false;
+                            let name = feature.getProperty("name");
+                            if (name == '道路2_27') {
+                                feature.show = true;
+                            }
+                        }
+
+                    }
+
+                });
+            }
+
+            if (tileset && tileset.name == 'road') {
                 tileset.tileLoad.addEventListener((tile: any) => {
                     let content = tile.content;
                     if (content && content.featuresLength > 0) {
@@ -1179,23 +1206,34 @@ export class CesiumUtils {
                         let defaultColor: any = "color('" + ('#fff') + "')";
                         let yellow: any = "color('" + ('#E6A23C') + "')";
                         let Green: any = "color('" + ('#67C23A') + "')";
-
                         let list: any = [
-                            ["${id} === " + "'" + '6c8349cc7260ae62e3b1396831a8398f_0' + "'", yellow],
-                            ["${id} === " + "'" + 'f7177163c833dff4b38fc8d2872f1ec6_0' + "'", yellow],
+                            ["${id} === " + "'" + 'd67d8ab4f4c10bf22aa353e27879133c' + "'", yellow],
+                            ["${id} === " + "'" + 'd645920e395fedad7bbbed0eca3fe2e0' + "'", yellow],
                         ];
+                        // list.push(["true", defaultColor]);
+                        // tileset.style = new Cesium.Cesium3DTileStyle({
+                        //     color: {
+                        //         conditions: list,
+                        //     },
+                        // });
+
+
                         for (let i = 0; i < featuresLength; ++i) {
                             const feature = content.getFeature(i);
-                            let id = feature.getProperty("id");
+                            // feature.color = Cesium.Color.WHITE.withAlpha(0.1);
+                            let name = feature.getProperty("name");
+                            // if (id == '6c8349cc7260ae62e3b1396831a8398f_0') {
+                            if (name == '道路2_27') {
+                                // feature.color = Cesium.Color.WHITE.withAlpha(0);
+                                feature.show = false;
+                            } else if (name == '道路2_13') {
+                                feature.color = Cesium.Color.YELLOW;
+                            }
+                            // }
                             // let newColor: any = "color('" + this.getRandomColor() + "')";
                             // list.push(["${id} === " + "'" + id + "'", newColor])
                         }
-                        list.push(["true", defaultColor]);
-                        tileset.style = new Cesium.Cesium3DTileStyle({
-                            color: {
-                                conditions: list,
-                            },
-                        });
+
                     }
 
                 });
@@ -1218,7 +1256,7 @@ export class CesiumUtils {
                     // 移动3D Tileset
                     // tileset.modelMatrix = [0.9904856831189405, -0.0465703700633231, 0.129496378978606, 0, 0.07957035563848916, 0.9615607043026339, -0.26281090244620187, 0, -0.1122794283917136, 0.2706145091697557, 0.9561177319696788, 0, -13517.659248067997, 6486.004929155111, -11945.898363439832, 1];//[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -77169.34087948734, 1037557.5408604145, -1594505.5402563005, 1]
                     // tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-                    this.jesium.viewer.zoomTo(tileset);
+                    // this.jesium.viewer.zoomTo(tileset);
 
 
                     // let height = 0

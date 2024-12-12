@@ -139,7 +139,7 @@
                     <el-scrollbar class="tableDatas">
                         <p @click.stop="flyToRoad(item, index)"
                             :style="roadInfo?.id == item.id ? 'background-color: var(--el-color-primary);' : ''"
-                            v-for="(item, index) in tableData_load" :key="index">
+                            v-for="(item, index) in tableData_road" :key="index">
                             <span>{{ index + 1 }}</span>
                             <!-- {{ 'k' + (index + 25) }} -->
                             <span>{{ 'k' + (index + 25) }}</span>
@@ -1943,22 +1943,25 @@ if (route.query.websocketId) {
     initWebSocket();
 }
 
-const tableData_load: any = ref([]);
+const tableData_road: any = ref([]);
 const roadInfo: any = ref();
 const roadDialogShow: any = ref();
 // 获取数据
 function getRoadList() {
-    tableData_load.value = [];
+    tableData_road.value = [];
     roadList()
         .then((res: any) => {
             res.scenes.forEach((e: any) => {
                 e.children.forEach((e2: any) => {
                     e2.children.forEach((e3: any) => {
                         e2.stage = Math.floor(Math.random() * 100) + 1;
-                        tableData_load.value.push(e3);
+                        tableData_road.value.push(e3);
                     });
                 });
             });
+
+            Web3DUtils.cesiumUtils.init3dtilesetJSON();
+            Web3DUtils.cesiumUtils.init3dtilesetBoard(tableData_road.value);
         })
         .catch((err: any) => { });
 }
@@ -2012,14 +2015,13 @@ const initCesium = () => {
             getDbShow(true);//地标
             // changMap(true);//切换地图
             // Web3DUtils.cesiumUtils.openTranslucency(true);//地下
-            Web3DUtils.cesiumUtils.init3dtilesetJSON();
             getRoadList();
             // Web3DUtils.cesiumUtils.init3dtilesetJSON('', (result: any) => {
             //     console.log(result, 'result')
-            //     tableData_load.value = result;
+            //     tableData_road.value = result;
             // });
-            Web3DUtils.cesiumUtils.clickRoadGetDetail(tableData_load.value, (id) => {
-                tableData_load.value.forEach((e: any, i: any) => {
+            Web3DUtils.cesiumUtils.clickRoadGetDetail(tableData_road.value, (id) => {
+                tableData_road.value.forEach((e: any, i: any) => {
                     if (e.id == id) {
                         e.segment = 'k' + (i + 25);
                         roadInfo.value = e;

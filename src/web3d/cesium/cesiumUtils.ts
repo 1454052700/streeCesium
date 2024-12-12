@@ -734,16 +734,16 @@ export class CesiumUtils {
                 }
                 // console.log(pickedFeature, 'pickedFeature')
 
-                nameOverlay.style.display = "block";
-                nameOverlay.style.bottom = `${_this.jesium.viewer.canvas.clientHeight - movement.endPosition.y
-                    }px`;
-                nameOverlay.style.left = `${movement.endPosition.x}px`;
-                const fid: any = pickedFeature.getProperty("id");
-                tableData.forEach((e: any, i: any) => {
-                    if (e.id == fid) {
-                        nameOverlay.textContent = 'k' + (i + 25);
-                    }
-                });
+                // nameOverlay.style.display = "block";
+                // nameOverlay.style.bottom = `${_this.jesium.viewer.canvas.clientHeight - movement.endPosition.y
+                //     }px`;
+                // nameOverlay.style.left = `${movement.endPosition.x}px`;
+                // const fid: any = pickedFeature.getProperty("id");
+                // tableData.forEach((e: any, i: any) => {
+                //     if (e.id == fid) {
+                //         nameOverlay.textContent = 'k' + (i + 25);
+                //     }
+                // });
 
 
             } else {
@@ -1068,6 +1068,58 @@ export class CesiumUtils {
         return lastMatrix //返回最终变换矩阵
     }
 
+    init3dtilesetBoard(tableData_road: any[]) {
+        let distanceDisplayCondition = new Cesium.DistanceDisplayCondition(0, 20000);
+        tableData_road.forEach((element: any, inx: any) => {
+            let position = new Cesium.Cartesian3(element.sphere[0], element.sphere[1], element.sphere[2]);
+            var image = new Image()
+            image.src = '/roadImg/board2.png';
+            let width = 100;
+            let h = 100;
+            let option = {
+                image: this.combineIconAndLabel2('/roadImg/board2.png', 'k' + (inx + 25), width, h),
+                width: width,
+                height: h,
+                scale: 1,
+                distanceDisplayCondition,
+                pixelOffset: new Cesium.Cartesian2(0, -50),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+            }
+            image.onload = () => {
+                ; (async () => {
+                    this.clBillboards.push(this.jesium.modelUtils.addBillboard({
+                        position: position,
+                        ...option
+                    }))
+
+                })()
+            }
+            // const Billboard = this.jesium.modelUtils.addBillboard({
+            //     image: "/roadImg/board2.png",
+            //     id: 'road',
+            //     position: position,
+            //     width: 100,
+            //     height: 100,
+            //     horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            //     verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+            //     distanceDisplayCondition,//可视距离
+            // });
+
+            // const Label = this.jesium.modelUtils.addLabel({
+            //     text: 'k' + (inx + 25),
+            //     position: position,
+            //     font: "18px 雅黑",
+            //     style: Cesium.LabelStyle.FILL,
+            //     fillColor: Cesium.Color.WHITE,
+            //     pixelOffset: new Cesium.Cartesian2(0, -50),//负数越大靠左
+            //     horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            //     verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            //     distanceDisplayCondition,
+            //     eyeOffset: new Cesium.Cartesian3(0, 0, -10000)
+            // })
+        });
+    }
+
     init3dtilesetJSON() {
         // ``````````````````````````````````````````````````````````````````
         // 02百度
@@ -1238,8 +1290,8 @@ export class CesiumUtils {
 
                 });
                 tileset.readyPromise.then((tileset: any) => {
-                    let lng = midpoint.geometry.coordinates[0];//112.789675,23.103256;
-                    let lat = midpoint.geometry.coordinates[1];
+                    // let lng = midpoint.geometry.coordinates[0];//112.789675,23.103256;
+                    // let lat = midpoint.geometry.coordinates[1];
                     // 假设你已经有一个3D Tileset实例叫tileset
                     // 并且这个tileset已经被加载到Cesium的Viewer实例中，叫app
 
@@ -1259,43 +1311,22 @@ export class CesiumUtils {
                     // this.jesium.viewer.zoomTo(tileset);
 
 
-                    // let height = 0
-                    // let modelMatrix = this.moveModel(tileset, 112.93382735, 23.0994609, height)
-                    // tileset.modelMatrix = modelMatrix;//移动模型
-                    // let boundingSphere = new Cesium.BoundingSphere(
-                    //     tileset.boundingSphere.center,
-                    //     tileset.boundingSphere.radius
-                    // );
-                    // //飞向该包围盒
-                    // this.jesium.viewer.camera.flyToBoundingSphere(boundingSphere);
-                    // ···········································111
 
-                    // const cartographic = Cesium.Cartographic.fromCartesian(
-                    //     tileset.boundingSphere.center
-                    // );
 
-                    // console.log(cartographic, 'cartographic')
-                    // const surface = Cesium.Cartesian3.fromRadians(
-                    //     cartographic.longitude, //经度
-                    //     cartographic.latitude, //纬度
-                    //     0.0 //高度
-                    // );
-                    // // // 84坐标
-                    // let lng = midpoint.geometry.coordinates[0];//9.10228201;
-                    // let lat = midpoint.geometry.coordinates[1];//48.60771172;
-
-                    // const offset = Cesium.Cartesian3.fromRadians(
-                    //     lng,
-                    //     lat,
-                    //     1
-                    // );
-
-                    // const translation = Cesium.Cartesian3.subtract(
-                    //     offset, //根据中心点坐标和height值计算出的新的坐标点
-                    //     surface, //根据中心点坐标计算出的地表坐标点
-                    //     new Cesium.Cartesian3()
-                    // );
-                    // tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+                    //计算tileset的绑定范围
+                    var heightOffset = 0;
+                    var boundingSphere = tileset.boundingSphere;
+                    //计算中心点位置
+                    var cartographic = this.jesium.coordUtils.cato2Lat(Cesium.Cartographic.fromCartesian(boundingSphere.center));
+                    //计算中心点位置坐标
+                    var surface = Cesium.Cartesian3.fromRadians(cartographic.longitude,
+                        cartographic.latitude, 0);
+                    //偏移后的三维坐标
+                    var offset = Cesium.Cartesian3.fromRadians(cartographic.longitude,
+                        cartographic.latitude, heightOffset);
+                    var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
+                    //tileset.modelMatrix转换
+                    tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
 
                 });
             }
@@ -1746,11 +1777,11 @@ export class CesiumUtils {
 
             // 渲染字体
             // font属性设置顺序：font-style, font-variant, font-weight, font-size, line-height, font-family
-            ctx.fillStyle = Cesium.Color.BLACK.toCssColorString();
-            ctx.font = 'bold 14px Microsoft YaHei';
+            ctx.fillStyle = Cesium.Color.WHITE.toCssColorString();
+            ctx.font = 'bold 18px Microsoft YaHei';
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(label, size / 2, height / 2);
+            ctx.fillText(label, size / 2, height / 3.4);
 
             return canvas;
         });

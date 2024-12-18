@@ -641,7 +641,17 @@ export class CesiumUtils {
             function onMouseClick(this: any, click?: any) {
                 //自己需要写逻辑的地方
                 const pickedFeature = _this.jesium.viewer.scene.pick(click.position);
-                console.log(pickedFeature.content._model.boundingSphere.center, pickedFeature.getProperty("id"), 'pickedFeature')
+                // console.log(pickedFeature, 'pickedFeature')
+                // console.log(pickedFeature.content._model.boundingSphere.center, pickedFeature.getProperty("id"), 'pickedFeature')
+
+                if (pickedFeature.primitive instanceof Cesium.Billboard) {
+                    // 如果点击的是名牌
+                    const degrees = _this.jesium.coordUtils.cato2Lat(Cesium.Cartographic.fromCartesian(pickedFeature.primitive.position));
+                    _this.jesium.viewer.camera.flyTo({
+                        destination: Cesium.Cartesian3.fromDegrees(degrees.longitude, degrees.latitude, 1000),
+                    });
+                }
+
                 if (Cesium.defined(pickedFeature)) {
                     let id = pickedFeature.getProperty ? pickedFeature.getProperty("id") : null;
                     // console.log(pickedFeature.getProperty("name"), 'name')

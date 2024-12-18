@@ -102,6 +102,6 @@ export function uploadImages(parameter: any) {
 }
 
 export const roadList = async () => {
-    const res = await instance.get("/road/scenetree.json");
+    const res = await instance.get("/road3/scenetree.json");
     return res.data;
 }

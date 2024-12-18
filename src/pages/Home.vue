@@ -109,17 +109,17 @@
             <p class="label">旋转（度）：</p>
             <div class="item">
                 <p>X</p>
-                <el-slider class="horizontal_slider" :max="360" v-model="tableInfo.rotateX" :step="0.5"
+                <el-slider class="horizontal_slider" :min="-360" :max="360" v-model="tableInfo.rotateX" :step="0.1"
                     @input="handleChange($event, 7)" />
             </div>
             <div class="item">
                 <p>Y</p>
-                <el-slider class="horizontal_slider" :max="360" v-model="tableInfo.rotateY" :step="0.5"
+                <el-slider class="horizontal_slider" :min="-360" :max="360" v-model="tableInfo.rotateY" :step="0.5"
                     @input="handleChange($event, 8)" />
             </div>
             <div class="item">
                 <p>Z</p>
-                <el-slider class="horizontal_slider" :max="360" v-model="tableInfo.rotateZ" :step="0.5"
+                <el-slider class="horizontal_slider" :min="-360" :max="360" v-model="tableInfo.rotateZ" :step="0.5"
                     @input="handleChange($event, 9)" />
             </div>
         </div> -->
@@ -142,7 +142,7 @@
                             v-for="(item, index) in tableData_road" :key="index">
                             <span>{{ index + 1 }}</span>
                             <!-- {{ 'k' + (index + 25) }} -->
-                            <span>{{ 'k' + (index + 25) }}</span>
+                            <span>{{ item.name }}</span>
                             <span
                                 :style="!item.status ? 'color:#909399' : (item.status == 1 ? 'color:#E6A23C' : 'color:#67C23A')">{{
                                     !item.status ? '未完成' : (item.status == 1 ? '进行中' : '已完成') }}</span>
@@ -170,7 +170,8 @@
                 </div>
                 <div class="forms-item">
                     <p class="label">标段号</p>
-                    <p class=" ">{{ roadInfo.segment }} </p>
+                    <!-- segment -->
+                    <p class=" ">{{ roadInfo.name }} </p>
                 </div>
                 <div class="forms-item">
                     <p class="label">状态</p>
@@ -821,8 +822,10 @@ const mapType = ref(true);
 function closeMap() {
     mapType.value = !mapType.value;
     if (mapType.value) {
-        // 影像
         Web3DUtils.cesiumUtils.toggleBaseImagery(BaseImageryType.IMAGERY);
+        nextTick(() => {
+            Web3DUtils.cesiumUtils.openTranslucency(true);//地下
+        })
     } else {
         // 电子
         Web3DUtils.cesiumUtils.toggleBaseImagery();
@@ -1249,7 +1252,7 @@ function flyToRoad(item: any, index: any) {
         Web3DUtils.cesiumUtils.flyToRoad(item, false)
         return;
     } else {
-        item.segment = 'k' + (index + 25);
+        // item.segment = 'k' + (index + 25);
         roadInfo.value = item;
         Web3DUtils.cesiumUtils.flyToRoad(item, true)
     }
@@ -1955,7 +1958,9 @@ function getRoadList() {
                 e.children.forEach((e2: any) => {
                     e2.children.forEach((e3: any) => {
                         e2.stage = Math.floor(Math.random() * 100) + 1;
-                        tableData_road.value.push(e3);
+                        if (e3.name.indexOf('k') != -1) {
+                            tableData_road.value.push(e3);
+                        }
                     });
                 });
             });
@@ -2014,7 +2019,7 @@ const initCesium = () => {
             // }, 3000)
             getDbShow(true);//地标
             // changMap(true);//切换地图
-            // Web3DUtils.cesiumUtils.openTranslucency(true);//地下
+            Web3DUtils.cesiumUtils.openTranslucency(true);//地下
             getRoadList();
             // Web3DUtils.cesiumUtils.init3dtilesetJSON('', (result: any) => {
             //     console.log(result, 'result')
@@ -2023,11 +2028,12 @@ const initCesium = () => {
             Web3DUtils.cesiumUtils.clickRoadGetDetail(tableData_road.value, (id) => {
                 tableData_road.value.forEach((e: any, i: any) => {
                     if (e.id == id) {
-                        e.segment = 'k' + (i + 25);
+                        // e.segment = 'k' + (i + 25);
                         roadInfo.value = e;
+                        roadDialogShow.value = true;
                     }
                 });
-                roadDialogShow.value = true;
+
             })
 
             // allRanges();

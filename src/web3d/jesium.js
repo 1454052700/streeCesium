@@ -1601,6 +1601,7 @@ class ModelUtils {
         dynamicScreenSpaceErrorDensity: 0.1,
         dynamicScreenSpaceError: true,
         unionClippingRegions: true,
+        arcType: Cesium.ArcType.NONE,
       })
     );
     // 设置3dtiles的额外属性
@@ -2659,7 +2660,7 @@ class Jesium {
         //     requestWaterMask: true,
         //     requestVertexNormals: true  如果你需要光照效果
         // }),//cesium原生地图
-        // terrainProvider: Cesium$1.createWorldTerrain(), //地形
+        terrainProvider: Cesium$1.createWorldTerrain(), //地形
         // imageryProvider: new Cesium$1.ArcGisMapServerImageryProvider({
         //     url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
         // }),

@@ -1129,7 +1129,7 @@ export class CesiumUtils {
     }
 
     init3dtilesetJSON() {
-        this.jesium.viewer.scene.globe.depthTestAgainstTerrain = false;//地形检测
+        this.jesium.viewer.scene.globe.depthTestAgainstTerrain = true;//地形检测
         // ``````````````````````````````````````````````````````````````````
         // 02百度
         // 起点：112.686578,23.075547
@@ -1251,20 +1251,7 @@ export class CesiumUtils {
 
         // end······································
 
-        // var position: any = Cesium.Cartesian3.fromDegrees(Number(112.44304333), Number(22.99698513));
-        // console.log(position, 'positon')
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('1223/tileset.json', '1223', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('roads/1/tileset.json', 'roads_1', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('roads/2/tileset.json', 'roads_2', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('roads/3/tileset.json', 'roads_3', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('roads/4/tileset.json', 'roads_4', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('roads/5/tileset.json', 'roads_5', false));
         this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road3/tileset.json', 'road3', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road/tileset.json', 'road', false));
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road2/tileset.json', 'road2', false));
-
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('333/tileset.json', '333', true));
-
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
 
@@ -1381,7 +1368,7 @@ export class CesiumUtils {
                         // this.jesium.viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius * 3.5));
                         // 【🐲🐲🐲】相机锁定到某个点位，可以将相机移动限定在某个区域或实体上的时候会使用到
                         // Eg: 将相机锁定在某个点，使用相机的【lookAtTransform】
-                        // const transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+                        const transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
                         // this.jesium.viewer.scene.camera.lookAtTransform(
                         //     transform,
                         //     new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius)

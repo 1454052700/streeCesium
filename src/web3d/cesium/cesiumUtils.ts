@@ -10,7 +10,7 @@ import { getMultiPipelineModel, getPipelineInfo, pipelineList, getPipelineModel,
 import dayjs from "dayjs";
 import { CONFIG } from "../../config/config";
 import { Ref, nextTick, ref } from "vue";
-import { ElMessage } from "element-plus";
+import { ElLoading, ElMessage } from "element-plus";
 import {
     memberList,
     getGeoPosition
@@ -647,7 +647,7 @@ export class CesiumUtils {
                 if (pickedFeature.primitive instanceof Cesium.Billboard) {
                     // 如果点击的是名牌
                     const degrees = _this.jesium.coordUtils.cato2Lat(Cesium.Cartographic.fromCartesian(pickedFeature.primitive.position));
-                    _this.jesium.viewer.camera.flyTo({
+                    _this.jesium.viewer.camera.setView({
                         destination: Cesium.Cartesian3.fromDegrees(degrees.longitude, degrees.latitude, 1000),
                     });
                 }
@@ -1007,7 +1007,7 @@ export class CesiumUtils {
             } else {
                 color = newColor;
             }
-            if (tileset && tileset.name == 'road3') {
+            if (tileset && tileset.name == 'road_new') {
                 // tileset.style = new Cesium.Cesium3DTileStyle({
                 //     color: {
                 //         conditions: [
@@ -1020,8 +1020,8 @@ export class CesiumUtils {
                 if (val.sphere2 && show) {
                     // let center = new Cesium.Cartesian3(val.sphere2[0], val.sphere2[1], val.sphere2[2]);
                     // const degrees = this.jesium.coordUtils.cato2Lat(Cesium.Cartographic.fromCartesian(center));
-                    this.jesium.viewer.camera.flyTo({
-                        destination: Cesium.Cartesian3.fromDegrees(val.sphere2[0], val.sphere2[1], 1000)//degrees.longitude, degrees.latitude 112.44304333, 22.99698513
+                    this.jesium.viewer.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(val.sphere2[0], val.sphere2[1], 800)//degrees.longitude, degrees.latitude 112.44304333, 22.99698513
                     });
                 }
             }
@@ -1074,10 +1074,10 @@ export class CesiumUtils {
     }
 
     init3dtilesetBoard(tableData_road: any[]) {
-        let distanceDisplayCondition = new Cesium.DistanceDisplayCondition(0, 20000);
+        let distanceDisplayCondition = new Cesium.DistanceDisplayCondition(0, 30000);
         tableData_road.forEach((element: any, inx: any) => {
             // let position = new Cesium.Cartesian3(element.sphere[0], element.sphere[1], element.sphere[2]);
-            let position = Cesium.Cartesian3.fromDegrees(element.sphere2[0], element.sphere2[1], 0);
+            let position = Cesium.Cartesian3.fromDegrees(element.sphere2[0], element.sphere2[1], element.sphere2[2]);
             var image = new Image()
             image.src = '/roadImg/board2.png';
             let width = 100;
@@ -1088,10 +1088,12 @@ export class CesiumUtils {
                 width: width,
                 height: h,
                 scale: 1,
-                // distanceDisplayCondition,
-                pixelOffset: new Cesium.Cartesian2(0, -30),
+                distanceDisplayCondition,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
                 disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                scaleByDistance: new Cesium.NearFarScalar(2000, 1, 10000, 0.5),//近大远小
+                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                horizontalOrigin: Cesium.VerticalOrigin.CENTER,
+                scaleByDistance: new Cesium.NearFarScalar(1000, 0.7, 10000, 0.5),//近大远小
             }
             image.onload = () => {
                 ; (async () => {
@@ -1131,25 +1133,12 @@ export class CesiumUtils {
     init3dtilesetJSON() {
         this.jesium.viewer.scene.globe.depthTestAgainstTerrain = true;//地形检测
         // ``````````````````````````````````````````````````````````````````
-        // 02百度
-        // 起点：112.686578,23.075547
-        // 终点：112.434531,23.002631
-
-        // 84高德
-        // 112.68147319551686,23.07832093820937
-        // 112.42921248274365,23.005209491704836
-
-        // 112.789675,23.103256
-
-        // 112.427171,22.996361
-        // 112.690468,23.071807
-
-        // 九山：112.565016,23.01549
-        let p1 = [112.40618249, 22.99369892];
-        let p2 = [112.66653092, 23.05978162];
+        // let p1 = [112.40618249, 22.99369892];
+        // let p2 = [112.66653092, 23.05978162];
+        let p1 = [112.40604992, 22.98993951];
+        let p2 = [112.66668408, 23.0587872];
         var point1: any = turf.point(p1);
         var point2: any = turf.point(p2);
-        // console.log(point1, point2)
         // 测试点
         // this.jesium.viewer.entities.add({
         //     position: Cesium.Cartesian3.fromDegrees(p1[0], p1[1]),
@@ -1172,242 +1161,60 @@ export class CesiumUtils {
 
 
         var midpoint: any = turf.midpoint(point2, point1);
-
-        // 贴图纹理```······································
-        // var customShader = new Cesium.CustomShader({
-        //     // lightingModel: Cesium.LightingModel.UNLIT,
-        //     //  lightingModel: Cesium.LightingModel.PBR,
-        //     //设置变量，由顶点着色器传递给片元着色器
-        //     varyings: {
-        //         v_normalMC: Cesium.VaryingType.VEC3,
-        //         v_st: Cesium.VaryingType.VEC3
-        //     },
-        //     //外部传给顶点着色器或者片元着色器
-        //     uniforms: {
-        //         u_texture: {
-        //             value: new Cesium.TextureUniform({
-        //                 url: '/road/d.jpeg'
-        //             }),
-        //             type: Cesium.UniformType.SAMPLER_2D
-        //         },
-        //         u_texture1: {
-        //             value: new Cesium.TextureUniform({
-        //                 url: '/road/d.jpeg'
-        //             }),
-        //             type: Cesium.UniformType.SAMPLER_2D
-        //         }
-        //     },
-        //     //贴纹理
-        //     //顶点着色器
-        //     // vertexShaderText: `
-        //     //     void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
-        //     //           v_normalMC = vsInput.attributes.normalMC;
-        //     //           v_st=vsInput.attributes.positionMC;   
-        //     //     }`,
-        //     //片元着色器
-        //     fragmentShaderText: `
-        //        void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
-        //           vec3 positionMC = fsInput.attributes.positionMC;
-        //           int featureId = fsInput.featureIds.featureId_0;
-        //           //这里是设置要贴图的图片的尺寸，设置小了会重复
-        //           float width = 100.0;
-        //           float height = 100.0;
-        //           vec3 rgb;
-        //           material.diffuse = vec3(1.0, 0.0, 0.0);
-        //           //这是是设置了屋顶的颜色，当和法向量平行时，就是屋顶，这里设置0.95，相当于垂直，建筑物四周开始贴图
-        //         //   if (dot(vec3(0.0, 1.0, 0.0), v_normalMC) > 0.95) {
-        //         //     material.diffuse = vec3(1.0, 0.0, 0.0);
-        //         //   } else {
-        //             float textureX = 0.0;
-        //             float dotYAxis = dot(vec3(0.0, 0.0, 1.0), v_normalMC);
-        //             // cos(45deg) 约等于 0.71，这里是建筑物四周的向量与法向量会大于四十五度夹角
-        //             float c= 0.3;
-        //             // if (dotYAxis > c || dotYAxis < -c) {
-        //             // // x代表的是前后面
-        //               textureX = mod(positionMC.x, width) / width;
-        //             // } else {
-        //             // z代表的是左右面
-        //             //   textureX = mod(positionMC.x, width);
-        //             // }
-        //             float textureY = mod(positionMC.y, height) / height;
-        //             //我这里是根据建筑物高度贴了两张不同的图片
-        //             // if (positionMC.y > 30.0) {
-        //             //    rgb = texture2D(u_texture1, vec2(textureX, textureY)).rgb;       
-        //             // } else {
-        //                     rgb = texture2D(u_texture, vec2(textureX, textureY)).rgb;
-        //             // }
-
-        //             if (featureId == 4 || featureId == 5) {
-        //                 material.diffuse = rgb;
-        //             }else{
-        //                 material.diffuse = vec3(1.0);
-        //             }
-        //         //   }
-        //       }`
-        // })
-
-
-
-
-        // end······································
-
-        this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road3/tileset.json', 'road3', false));
+        const loading = ElLoading.service({
+            lock: true,
+            text: '模型加载中···',
+            background: 'rgba(0, 0, 0, 0.7)',
+        })
+        this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road_new/tileset.json', 'road_new', false));
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
-
-            // tileset.customShader = customShader;//纹理
-            // console.log(customShader, 'customShader')
-
-            // if (tileset && tileset.name == 'road') {
-            //     tileset.tileLoad.addEventListener((tile: any) => {
-            //         let content = tile.content;
-            //         if (content && content.featuresLength > 0) {
-            //             const featuresLength = content.featuresLength;
-            //             let defaultColor: any = "color('" + ('#fff') + "')";
-            //             let yellow: any = "color('" + ('#E6A23C') + "')";
-            //             let Green: any = "color('" + ('#67C23A') + "')";
-            //             let list: any = [
-            //                 ["${id} === " + "'" + 'd67d8ab4f4c10bf22aa353e27879133c' + "'", yellow],
-            //                 ["${id} === " + "'" + 'd645920e395fedad7bbbed0eca3fe2e0' + "'", yellow],
-            //             ];
-            //             // list.push(["true", defaultColor]);
-            //             // tileset.style = new Cesium.Cesium3DTileStyle({
-            //             //     color: {
-            //             //         conditions: list,
-            //             //     },
-            //             // });
-
-
-            //             for (let i = 0; i < featuresLength; ++i) {
-            //                 const feature = content.getFeature(i);
-            //                 // feature.color = Cesium.Color.WHITE.withAlpha(0.1);
-            //                 let name = feature.getProperty("name");
-            //                 // if (id == '6c8349cc7260ae62e3b1396831a8398f_0') {
-            //                 if (name == '道路2_27') {
-            //                     // feature.color = Cesium.Color.WHITE.withAlpha(0);
-            //                     feature.show = false;
-            //                 } else if (name == '道路2_13') {
-            //                     feature.color = Cesium.Color.YELLOW;
-            //                 }
-            //                 // }
-            //                 // let newColor: any = "color('" + this.getRandomColor() + "')";
-            //                 // list.push(["${id} === " + "'" + id + "'", newColor])
-            //             }
-
-            //         }
-
-            //     });
-            // tileset.readyPromise.then((tileset: any) => {
-            //     let lng = midpoint.geometry.coordinates[0];//112.789675,23.103256;
-            //     let lat = midpoint.geometry.coordinates[1];
-            //     // 假设你已经有一个3D Tileset实例叫tileset
-            //     // 并且这个tileset已经被加载到Cesium的Viewer实例中，叫app
-
-            //     // 计算3D Tileset的当前中心点
-            //     var boundingSphere = tileset.boundingSphere;
-            //     var oldCenter = Cesium.Cartesian3.clone(boundingSphere.center);
-
-            //     // 设置新的中心点，假设我们要把中心点移动到经纬度为longitude和latitude，高程为height的位置
-            //     var newCenter = Cesium.Cartesian3.fromDegrees(lng, lat, 0);
-
-            //     // 计算移动的偏移量
-            //     var translation = Cesium.Cartesian3.subtract(newCenter, oldCenter, new Cesium.Cartesian3());
-
-            //     // 移动3D Tileset
-            //     tileset.modelMatrix = [0.9904856831189405, -0.0465703700633231, 0.129496378978606, 0, 0.07957035563848916, 0.9615607043026339, -0.26281090244620187, 0, -0.1122794283917136, 0.2706145091697557, 0.9561177319696788, 0, -13517.659248067997, 6486.004929155111, -11945.898363439832, 1];//[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -77169.34087948734, 1037557.5408604145, -1594505.5402563005, 1]
-            //     tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-
-            // });
-            // }
-
-            if (tileset && tileset.name == 'road3') {
+            if (tileset && tileset.name == 'road_new') {
                 tileset.tileLoad.addEventListener((tile: any) => {
                     let content = tile.content;
                     if (content && content.featuresLength > 0) {
                         const featuresLength = content.featuresLength;
                         for (let i = 0; i < featuresLength; ++i) {
                             const feature = content.getFeature(i);
-                            // let id = feature.getProperty("id");
                             let name = feature.getProperty("name");
                             if (name.indexOf('Text') != -1) {//隐藏模型中的文字
                                 feature.show = false;
                             }
-                            // console.log(feature.content._model.boundingSphere.center, 'pickedFeature')
                         }
                     }
                 });
 
                 tileset.readyPromise.then((tileset: any) => {
-                    var heightOffset = -48;
+                    var heightOffset = -24;
                     let modelMatrix = this.moveModel(tileset, midpoint.geometry.coordinates[0], midpoint.geometry.coordinates[1], heightOffset)
                     tileset.modelMatrix = modelMatrix;//移动模型
-                    // //计算tileset的绑定范围
-                    // var boundingSphere = tileset.boundingSphere;
-                    // //计算中心点位置
-                    // var cartographic = Cesium.Cartographic.fromCartesian(boundingSphere.center);
-                    // //计算中心点位置坐标
-                    // var surface = Cesium.Cartesian3.fromRadians(cartographic.longitude,
-                    //     cartographic.latitude, 0);
-                    // //偏移后的三维坐标
-                    // var offset = Cesium.Cartesian3.fromRadians(cartographic.longitude,
-                    //     cartographic.latitude, heightOffset);
-                    // var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
-                    // //tileset.modelMatrix转换
-                    // tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
 
                     tileset.boundingSphere.radius = tileset.boundingSphere.radius / 2;
                     this.jesium.viewer.zoomTo(tileset, {
                         heading: 0,
                         pitch: Cesium.Math.toRadians(-90.0),
                         range: 0
-                    });
+                    }).then((result) => {
+                        if (result) {
+                            loading.close();
+                            var center = tileset.boundingSphere.center;
+                            // this.jesium.viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius * 3.6));
+                        }
+                    });;
 
-
-                    setTimeout(() => {
-                        var center = tileset.boundingSphere.center;
-                        // this.jesium.viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius * 3.5));
-                        // 【🐲🐲🐲】相机锁定到某个点位，可以将相机移动限定在某个区域或实体上的时候会使用到
-                        // Eg: 将相机锁定在某个点，使用相机的【lookAtTransform】
-                        const transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
-                        // this.jesium.viewer.scene.camera.lookAtTransform(
-                        //     transform,
-                        //     new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius)
-                        // )
-                    }, 1000)
+                    // var center = tileset.boundingSphere.center;
+                    // this.jesium.viewer.camera.lookAt(center, new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius * 3.6));
+                    // 【🐲🐲🐲】相机锁定到某个点位，可以将相机移动限定在某个区域或实体上的时候会使用到
+                    // Eg: 将相机锁定在某个点，使用相机的【lookAtTransform】
+                    // const transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+                    // this.jesium.viewer.scene.camera.lookAtTransform(
+                    //     transform,
+                    //     new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-90.0), tileset.boundingSphere.radius * 3.6)
+                    // )
                 });
 
             }
 
-            // if (tileset && tileset.name.indexOf('roads') != -1) {
-            //     tileset.readyPromise.then((tileset: any) => {
-            //         var heightOffset = 0;
-            //         if (tileset.name == 'roads_1') {
-            //             heightOffset = -5;
-            //         } else if (tileset.name == 'roads_2') {
-            //             heightOffset = -5;
-            //         } else if (tileset.name == 'roads_3') {
-            //             heightOffset = -5;
-            //         } else if (tileset.name == 'roads_4') {
-            //             heightOffset = -5;
-            //         } else if (tileset.name == 'roads_5') {
-            //             heightOffset = -5;
-            //         }
-
-            //         //计算tileset的绑定范围
-            //         var boundingSphere = tileset.boundingSphere;
-            //         //计算中心点位置
-            //         var cartographic = Cesium.Cartographic.fromCartesian(boundingSphere.center);
-            //         //计算中心点位置坐标
-            //         var surface = Cesium.Cartesian3.fromRadians(cartographic.longitude,
-            //             cartographic.latitude, 0);
-            //         //偏移后的三维坐标
-            //         var offset = Cesium.Cartesian3.fromRadians(cartographic.longitude,
-            //             cartographic.latitude, heightOffset);
-            //         var translation = Cesium.Cartesian3.subtract(offset, surface, new Cesium.Cartesian3());
-            //         //tileset.modelMatrix转换
-            //         tileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
-            //     });
-            // }
         })
     }
 
@@ -4335,16 +4142,21 @@ export class CesiumUtils {
                     cartographic = Cesium.Cartographic.fromCartesian(cartesian);
                 }
             } else {
-                const start_point: any = this.jesium.viewer.scene.camera.pickEllipsoid(
-                    event.position,
-                    this.jesium.viewer.scene.globe.ellipsoid
-                ); // 获取点的世界坐标
-                // 笛卡尔坐标转弧度
-                cartographic = Cesium.Cartographic.fromCartesian(
-                    start_point,
-                    this.jesium.viewer.scene.globe.ellipsoid,
-                    new Cesium.Cartographic()
-                );
+                // const start_point: any = this.jesium.viewer.scene.camera.pickEllipsoid(
+                //     event.position,
+                //     this.jesium.viewer.scene.globe.ellipsoid
+                // ); // 获取点的世界坐标
+                // // 笛卡尔坐标转弧度
+                // cartographic = Cesium.Cartographic.fromCartesian(
+                //     start_point,
+                //     this.jesium.viewer.scene.globe.ellipsoid,
+                //     new Cesium.Cartographic()
+                // );
+
+                //地形高度
+                var ray: any = this.jesium.viewer.camera.getPickRay(event.position);
+                var cartesian2: any = this.jesium.viewer.scene.globe.pick(ray, this.jesium.viewer.scene);
+                cartographic = Cesium.Cartographic.fromCartesian(cartesian2);
             }
 
             // Cesium.Math.toDegrees 弧度转度，将弧度转换成经纬度

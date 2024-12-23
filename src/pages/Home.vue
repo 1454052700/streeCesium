@@ -1247,6 +1247,7 @@ function flyToModel(item: any, h?: any) {
 }
 
 function flyToRoad(item: any, index: any) {
+    roadDialogShow.value = false;
     if (roadInfo.value && item.id == roadInfo.value.id) {
         roadInfo.value = null;
         Web3DUtils.cesiumUtils.flyToRoad(item, false)
@@ -1957,7 +1958,7 @@ function getRoadList() {
             res.scenes.forEach((e: any) => {
                 e.children.forEach((e2: any) => {
                     e2.children.forEach((e3: any) => {
-                        e2.stage = Math.floor(Math.random() * 100) + 1;
+                        // e2.stage = Math.floor(Math.random() * 100) + 1;
                         if (e3.name.indexOf('k') != -1) {
                             tableData_road.value.push(e3);
                         }
@@ -2004,15 +2005,15 @@ const initCesium = () => {
     onMounted(() => {
         /* 初始化cesium */
 
-        // const loading = ElLoading.service({
-        //     lock: true,
-        //     text: 'Loading',
-        //     background: 'rgba(0, 0, 0, 0.7)',
-        // })
+        const loading = ElLoading.service({
+            lock: true,
+            text: '环境正在初始化····',
+            background: 'rgba(0, 0, 0, 0.7)',
+        })
         // scenceSucShow.value = true;
         Web3DUtils.cesiumUtils = new CesiumUtils(cesiumContainer.value, () => {
             console.log("场景加载完成");
-            // loading.close();
+            loading.close();
             // scenceSucShow.value = true;
             // setTimeout(() => {
             // scenceSucShow.value = false;

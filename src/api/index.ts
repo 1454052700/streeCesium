@@ -105,3 +105,11 @@ export const roadList = async () => {
     const res = await instance.get("/road_new/scenetree.json");
     return res.data;
 }
+
+export function screenProgress(parameter: any) {
+    return Request.axiosInstance({
+        url: '/prod-api/api/screen/progress',
+        method: 'get',
+        params: parameter
+    })
+}

@@ -2,10 +2,10 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from "path"
 // import postCssPxToRem from "postcss-pxtorem"
-
-let testUrl = 'www.cybergeo.cn';
-let masterUrl = '47.238.143.171'; //'hj.easyar.cn';
-let newUrl = '192.168.31.109'
+// http://xqkme.kuchuangnet.com:20010/prod-api/api/screen/progress
+// https://xqkme.kuchuangnet.com:20011/prod-api/api/screen/progress
+let testUrl = 'http://xqkme.kuchuangnet.com:20010/';
+let masterUrl = 'https://xqkme.kuchuangnet.com:20011/'; //'hj.easyar.cn';
 
 let ip = testUrl;
 
@@ -17,7 +17,7 @@ export default defineConfig({
     server: {
         proxy: {
             "/api": {
-                target: "http://" + ip + ":9090/",
+                target: ip,
                 secure: false, // 请求是否为https
                 changeOrigin: true, // 是否跨域
                 rewrite: (path) => path.replace(/^\/api/, "")

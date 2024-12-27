@@ -156,7 +156,7 @@
                 </div>
             </div>
         </div>
-        <div class="infosDialog" v-if="roadDialogShow" style="width: 500px;">
+        <div class="roadInfo" v-if="roadDialogShow">
             <div class="infosDialog-title">
                 <p>详细信息</p>
                 <el-icon @click="roadDialogShow = false, roadInfo = null">
@@ -165,30 +165,32 @@
             </div>
             <div class="forms forms2">
                 <div class="forms-item">
-                    <p class="label">编号</p>
-                    <p class=" ">{{ roadInfo.id }} </p>
-                </div>
-                <div class="forms-item">
                     <p class="label">标段号</p>
                     <!-- segment -->
-                    <p class=" ">{{ roadInfo.name }} </p>
-                </div>
-                <div class="forms-item">
-                    <p class="label">状态</p>
                     <p class=" ">
+                        <span style="margin-right: 16px;">{{ roadInfo.segment }}</span>
                         <span
                             :style="!roadInfo.status ? 'color:#909399' : (roadInfo.status == 1 ? 'color:#E6A23C' : 'color:#67C23A')">{{
                                 !roadInfo.status ? '未完成' : (roadInfo.status == 1 ? '进行中' : '已完成') }}</span>
                     </p>
                 </div>
                 <div class="forms-item">
-                    <p class="label">铺层进度</p>
-                    <p class=" "> 垫层：75% ; &nbsp;&nbsp;&nbsp;&nbsp;底基层：50% ; &nbsp;&nbsp;&nbsp;&nbsp;基层：5%</p>
+                    <!-- <p class="label">铺层进度</p> -->
+                    <div class="forms-table">
+                        <p class="forms-table-th">
+                            <span v-for="(item, index) in roadInfo.layers">{{ item.layerName }}</span>
+                        </p>
+                        <p class="forms-table-tr">
+                            <span v-for="(item, index) in roadInfo.layers">{{ item.progress }}%</span>
+                        </p>
+                    </div>
+                    <!-- <p style="display: flex;">
+                        <span style="display: block;margin-bottom: 5px;flex: 1;"
+                            v-for="(item, index) in roadInfo.layers">
+                            <span style="width: 70px;display: inline-block;">{{ item.layerName }}：</span>{{
+                                item.progress }}%；</span>
+                    </p> -->
                 </div>
-                <!-- <div class="forms-item">
-                    <p class="label">中心坐标</p>
-                    <p class=" ">{{ roadInfo.location }} </p>
-                </div> -->
             </div>
             <div class="infosDialog-footer">
                 <p @click="roadDialogShow = false">{{ $t('lang.close') }}</p>
@@ -574,7 +576,7 @@ import { useRoute } from "vue-router";
 import { BaseImageryType, CesiumUtils } from "../web3d/cesium/cesiumUtils";
 import { Web3DUtils } from "../web3d";
 import * as Cesium from "cesium";
-import { attributeList, iconList, pipelineallpoint, reconstructionList, reconstructionSubmit, removeModel, removePoi, roadList, uploadImages } from "../api/index";
+import { attributeList, iconList, pipelineallpoint, reconstructionList, reconstructionSubmit, removeModel, removePoi, roadList, screenProgress, uploadImages } from "../api/index";
 import { poiList, poiSubmit, } from "../api/index";
 import { allRange, deletePipe } from "@/api/linePipe";
 import { ElLoading, ElMessage, ElMessageBox, UploadInstance, UploadProps } from "element-plus";
@@ -1996,6 +1998,19 @@ function handleChange(val: any, type: any) {
     tableInfo.value.oldValue = val;
 }
 
+function getDetail(segment: any) {
+    // status完成状态，整型，0:未完成;1:进行中;2已完成;
+    screenProgress({
+        segment
+    })
+        .then((res: any) => {
+            roadInfo.value = res.data.data;
+            console.log(roadInfo.value, 'value')
+            roadDialogShow.value = true;
+        })
+        .catch((err: any) => { });
+}
+
 
 // 初始化cesium
 const cesiumContainer = ref(); // cesium的父级元素
@@ -2007,7 +2022,7 @@ const initCesium = () => {
 
         const loading = ElLoading.service({
             lock: true,
-            text: '环境正在初始化····',
+            text: '正在初始化环境····',
             background: 'rgba(0, 0, 0, 0.7)',
         })
         // scenceSucShow.value = true;
@@ -2029,9 +2044,7 @@ const initCesium = () => {
             Web3DUtils.cesiumUtils.clickRoadGetDetail(tableData_road.value, (id) => {
                 tableData_road.value.forEach((e: any, i: any) => {
                     if (e.id == id) {
-                        // e.segment = 'k' + (i + 25);
-                        roadInfo.value = e;
-                        roadDialogShow.value = true;
+                        getDetail(e.name);
                     }
                 });
 
@@ -2950,6 +2963,202 @@ p {
     .cesium-container {
         width: 100%;
         height: 100%;
+    }
+}
+
+
+.roadInfo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    right: 0;
+    width: 500px;
+    z-index: 999;
+    border-radius: 2px;
+    background: rgba(42, 46, 48, 1);
+    transform: translate(-50%, -50%);
+
+    .infosDialog-title {
+        background: rgba(46, 52, 54, 1);
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #fff;
+        padding: 0 32px;
+        box-sizing: border-box;
+    }
+
+    .forms {
+        padding: 18px 32px;
+        box-sizing: border-box;
+        color: #fff;
+        max-height: 70vh;
+
+        .forms-item {
+            display: flex;
+            align-items: center;
+
+            .label {
+                font-size: 14px;
+                margin-right: 29px;
+                min-width: 68px;
+                color: rgba(255, 255, 255, 0.6);
+            }
+
+            :deep(.el-cascader) {
+                border: 1px solid rgba(105, 117, 137, 1) !important;
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2) !important;
+                background: rgba(75, 76, 77, 1) !important;
+                border-radius: 2px;
+                height: 32px;
+                line-height: 32px;
+                box-sizing: border-box;
+            }
+
+            .border {
+                border: 1px solid rgba(75, 76, 77, 1);
+                // width: calc(100% - 60px);
+                // height: 32px;
+                // line-height: 32px;
+                padding: 0 12px;
+                box-sizing: border-box;
+                font-size: 14px;
+            }
+
+            .border2 {
+                padding: 0 !important;
+            }
+
+            .value {
+                border: 1px solid rgba(105, 117, 137, 1);
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2) !important;
+                background: rgba(75, 76, 77, 1) !important;
+                border-radius: 2px;
+                // height: 32px;
+                // line-height: 32px;
+                padding-left: 12px;
+                box-sizing: border-box;
+            }
+        }
+
+        .forms-border {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            box-sizing: border-box;
+
+            p:first-of-type {
+                width: 66px;
+            }
+
+            p:last-of-type {
+                width: calc(100% - 66px);
+                border-bottom: 1px solid rgba(62, 64, 65, 1);
+                margin-left: 14px;
+            }
+        }
+
+        .forms-flex {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-column-gap: 44px;
+            grid-row-gap: 12px;
+            font-size: 14px;
+
+            p {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                span {
+                    display: block;
+                }
+
+                span:last-of-type {
+                    width: 132px;
+                    height: 32px;
+                    border-radius: 2px;
+                    line-height: 32px;
+                    border: 1px solid rgba(75, 76, 77, 1);
+                    padding: 0 12px;
+                    box-sizing: border-box;
+                }
+            }
+        }
+
+        .forms-table {
+            font-size: 14px;
+            margin-top: 16px;
+            width: 100%;
+
+            p {
+                line-height: 32px;
+                border: 1px solid rgba(75, 76, 77, 1);
+                display: flex;
+                align-items: center;
+
+                span {
+                    height: 100%;
+                    flex: 1;
+                    text-align: center;
+                    display: inline-block;
+                    border-right: 1px solid rgba(75, 76, 77, 1);
+                }
+
+            }
+
+            .forms-table-th {
+                background: rgba(75, 76, 77, 1);
+
+                span {
+                    border: 0 !important;
+                }
+            }
+
+            .forms-table-tr {
+                span:last-of-type {
+                    border: 0 !important;
+                }
+            }
+        }
+
+
+
+
+    }
+
+
+    .infosDialog-footer {
+        background: rgba(46, 52, 54, 1);
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        color: #fff;
+        padding: 0 32px;
+        box-sizing: border-box;
+
+        p {
+            border-radius: 2px;
+            background: rgba(51, 100, 241, 1);
+            width: 64px;
+            height: 24px;
+            line-height: 22px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .reset {
+            border: 1px solid rgba(68, 119, 238, 1);
+            background: transparent;
+            box-sizing: border-box;
+            margin-right: 12px;
+            color: rgba(68, 119, 238, 1);
+            width: 96px;
+        }
+
     }
 }
 </style>

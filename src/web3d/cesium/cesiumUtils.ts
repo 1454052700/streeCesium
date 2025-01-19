@@ -487,35 +487,35 @@ export class CesiumUtils {
     realign3dTileset(row?: any, val?: any, type?: any, callback: ((coords: any) => void) = () => { }) {
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
-            // if (tileset.name.indexOf(row.name) != -1) {
-            switch (type) {
-                case 1:
-                    tileset = this.translate3dTileset(tileset, val, 0, 0)
-                    break;
-                case 2:
-                    tileset = this.translate3dTileset(tileset, 0, val, 0)
-                    break;
-                case 3:
-                    tileset = this.translate3dTileset(tileset, 0, 0, val)
-                    break;
-                case 7:
-                    tileset = this.rotate3dTileset(tileset, val, 0, 0)
-                    break;
-                case 8:
-                    tileset = this.rotate3dTileset(tileset, 0, val, 0)
-                    break;
-                case 9:
-                    tileset = this.rotate3dTileset(tileset, 0, 0, val)
-                    break;
-                default:
-                    break;
+            if (tileset.name == 'road') {
+                switch (type) {
+                    case 1:
+                        tileset = this.translate3dTileset(tileset, val, 0, 0)
+                        break;
+                    case 2:
+                        tileset = this.translate3dTileset(tileset, 0, val, 0)
+                        break;
+                    case 3:
+                        tileset = this.translate3dTileset(tileset, 0, 0, val)
+                        break;
+                    case 7:
+                        tileset = this.rotate3dTileset(tileset, val, 0, 0)
+                        break;
+                    case 8:
+                        tileset = this.rotate3dTileset(tileset, 0, val, 0)
+                        break;
+                    case 9:
+                        tileset = this.rotate3dTileset(tileset, 0, 0, val)
+                        break;
+                    default:
+                        break;
+                }
+                // 获取矩阵
+                nextTick(() => {
+                    var data = JSON.stringify(Cesium.Matrix4.toArray(tileset.modelMatrix))
+                    callback(data)
+                })
             }
-            // 获取矩阵
-            nextTick(() => {
-                var data = JSON.stringify(Cesium.Matrix4.toArray(tileset.modelMatrix))
-                callback(data)
-            })
-            // }
         })
     }
 
@@ -1177,7 +1177,7 @@ export class CesiumUtils {
             text: '模型加载中···',
             background: 'rgba(0, 0, 0, 0.7)',
         })
-        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('baimo/tileset.json', 'road', false));
+        this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('baimo/tileset.json', 'road', false));
         this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road_new/tileset.json', 'road_new', false));
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
@@ -1197,13 +1197,14 @@ export class CesiumUtils {
                                 if (data && data.status == 0) {
                                     feature.show = true;
                                 } else if (data && data.status == 1) {
+                                    feature.show = true;
                                     feature.color = Cesium.Color.YELLOW;
                                 }
                             }
 
                             if (tileset.name == 'road_new') {
-                                if (data && data.status == 0) {
-                                    // feature.show = false;
+                                if (data && data.status != 2) {
+                                    feature.show = false;
                                 }
                             }
 
@@ -1216,12 +1217,10 @@ export class CesiumUtils {
                     let modelMatrix = this.moveModel(tileset, midpoint.geometry.coordinates[0], midpoint.geometry.coordinates[1], heightOffset)
                     tileset.modelMatrix = modelMatrix;//移动模型
 
-
-                    if (tileset.name == 'road_new') {
-                        this.rotate3dTileset(tileset, 0, 0, 1.3)//z轴旋转1.3
-                    } else if (tileset.name == 'road') {
-                        this.rotate3dTileset(tileset, 0, 0, 0.9)//z轴旋转0.9
-                        this.translate3dTileset(tileset, 0, 100, 0)
+                    this.rotate3dTileset(tileset, 0, 0, 1.3)//z轴旋转1.3
+                    if (tileset.name == 'road') {
+                        // this.rotate3dTileset(tileset, 0, 0, 1.3)//z轴旋转0.9
+                        this.translate3dTileset(tileset, -4.5, 184.3, 0)
                     }
 
                     tileset.boundingSphere.radius = tileset.boundingSphere.radius / 2;

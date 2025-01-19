@@ -93,13 +93,13 @@
             <p class="label">平移（米）：</p>
             <div class="item">
                 <p>X</p>
-                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationX" :step="0.5"
+                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationX" :step="0.1"
                     @input="handleChange($event, 1)" />
             </div>
             <div class="item">
                 <p>Y</p>
-                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationY" :step="0.5"
-                    @input="handleChange($event, 2)" />
+                <el-slider class="horizontal_slider" :min="-1000" :max="1000" v-model="tableInfo.translationY"
+                    :step="0.1" @input="handleChange($event, 2)" />
             </div>
             <div class="item">
                 <p>Z</p>

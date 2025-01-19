@@ -512,7 +512,6 @@ export class CesiumUtils {
             }
             // 获取矩阵
             nextTick(() => {
-                console.log(tileset, 'tileset')
                 var data = JSON.stringify(Cesium.Matrix4.toArray(tileset.modelMatrix))
                 callback(data)
             })
@@ -1077,6 +1076,9 @@ export class CesiumUtils {
         let distanceDisplayCondition = new Cesium.DistanceDisplayCondition(0, 30000);
         tableData_road.forEach((element: any, inx: any) => {
             // let position = new Cesium.Cartesian3(element.sphere[0], element.sphere[1], element.sphere[2]);
+            if (!element.sphere2) {
+                return false;
+            }
             let position = Cesium.Cartesian3.fromDegrees(element.sphere2[0], element.sphere2[1], element.sphere2[2]);
             var image = new Image()
             image.src = '/roadImg/board2.png';
@@ -1130,16 +1132,17 @@ export class CesiumUtils {
         });
     }
 
-    init3dtilesetJSON() {
+    init3dtilesetJSON(tableData_road: any) {
         this.jesium.viewer.scene.globe.depthTestAgainstTerrain = true;//地形检测
         // ``````````````````````````````````````````````````````````````````
-        // let p1 = [112.40618249, 22.99369892];
-        // let p2 = [112.66653092, 23.05978162];
-        let p1 = [112.40604992, 22.98993951];
-        let p2 = [112.66668408, 23.0587872];
+        let p1 = [112.4058026, 22.98293959];
+        let p2 = [112.66748646, 23.06950637];
         var point1: any = turf.point(p1);
         var point2: any = turf.point(p2);
-        // 测试点
+        var midpoint: any = turf.midpoint(point1, point2);
+        // sessionStorage.setItem('myLocation', midpoint.geometry.coordinates)
+
+        // 测试点1
         // this.jesium.viewer.entities.add({
         //     position: Cesium.Cartesian3.fromDegrees(p1[0], p1[1]),
         //     point: {
@@ -1149,7 +1152,7 @@ export class CesiumUtils {
         //     },
         // });
 
-        // 测试点
+        // 测试点2
         // this.jesium.viewer.entities.add({
         //     position: Cesium.Cartesian3.fromDegrees(p2[0], p2[1]),
         //     point: {
@@ -1159,17 +1162,26 @@ export class CesiumUtils {
         //     },
         // });
 
+        // 中心点
+        // this.jesium.viewer.entities.add({
+        //     position: Cesium.Cartesian3.fromDegrees(midpoint.geometry.coordinates[0], midpoint.geometry.coordinates[1]),
+        //     point: {
+        //         pixelSize: 10,
+        //         color: Cesium.Color.RED,
+        //         disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        //     },
+        // });
 
-        var midpoint: any = turf.midpoint(point2, point1);
         const loading = ElLoading.service({
             lock: true,
             text: '模型加载中···',
             background: 'rgba(0, 0, 0, 0.7)',
         })
+        // this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('baimo/tileset.json', 'road', false));
         this.__scene3DTilesUUIDSet.push(this.jesium.modelUtils.add3DTiles('road_new/tileset.json', 'road_new', false));
         this.__scene3DTilesUUIDSet.forEach((tilesetUUID, index) => {
             let tileset: any = this.jesium.modelUtils.get3DTilesByUUID(tilesetUUID);
-            if (tileset && tileset.name == 'road_new') {
+            if (tileset) {//.indexOf('road') != -1
                 tileset.tileLoad.addEventListener((tile: any) => {
                     let content = tile.content;
                     if (content && content.featuresLength > 0) {
@@ -1177,17 +1189,40 @@ export class CesiumUtils {
                         for (let i = 0; i < featuresLength; ++i) {
                             const feature = content.getFeature(i);
                             let name = feature.getProperty("name");
-                            if (name.indexOf('Text') != -1) {//隐藏模型中的文字
+                            let data = tableData_road.find((i: any) => {
+                                return i.name == name;
+                            })
+                            if (tileset.name == 'road') {//白膜
                                 feature.show = false;
+                                if (data && data.status == 0) {
+                                    feature.show = true;
+                                } else if (data && data.status == 1) {
+                                    feature.color = Cesium.Color.YELLOW;
+                                }
                             }
+
+                            if (tileset.name == 'road_new') {
+                                if (data && data.status == 0) {
+                                    // feature.show = false;
+                                }
+                            }
+
                         }
                     }
                 });
 
                 tileset.readyPromise.then((tileset: any) => {
-                    var heightOffset = -24;
+                    var heightOffset = -10;
                     let modelMatrix = this.moveModel(tileset, midpoint.geometry.coordinates[0], midpoint.geometry.coordinates[1], heightOffset)
                     tileset.modelMatrix = modelMatrix;//移动模型
+
+
+                    if (tileset.name == 'road_new') {
+                        this.rotate3dTileset(tileset, 0, 0, 1.3)//z轴旋转1.3
+                    } else if (tileset.name == 'road') {
+                        this.rotate3dTileset(tileset, 0, 0, 0.9)//z轴旋转0.9
+                        this.translate3dTileset(tileset, 0, 100, 0)
+                    }
 
                     tileset.boundingSphere.radius = tileset.boundingSphere.radius / 2;
                     this.jesium.viewer.zoomTo(tileset, {

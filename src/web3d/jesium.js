@@ -2680,6 +2680,12 @@ class Jesium {
     this.viewer.scene.globe.depthTestAgainstTerrain = true; //开启高程遮挡
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new Cesium$1.NearFarScalar(400.0, 0.0, 800.0, 1.0);
+
+    // DirectionalLight 表示 从无限远的地方向单一方向发射的光。
+    this.viewer.scene.light = new Cesium$1.DirectionalLight({
+      direction: new Cesium$1.Cartesian3(0.354925, -0.890918, -0.283358),
+    });
+
     // // 初始化帮助类们
     this.modelUtils = new ModelUtils(this.viewer);
     this.coordUtils = new CoordUtils(this.viewer);

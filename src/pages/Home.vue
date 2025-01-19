@@ -93,18 +93,18 @@
             <p class="label">平移（米）：</p>
             <div class="item">
                 <p>X</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationX"
-                    :step="0.5" @input="handleChange($event, 1)" />
+                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationX" :step="0.5"
+                    @input="handleChange($event, 1)" />
             </div>
             <div class="item">
                 <p>Y</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationY"
-                    :step="0.5" @input="handleChange($event, 2)" />
+                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationY" :step="0.5"
+                    @input="handleChange($event, 2)" />
             </div>
             <div class="item">
                 <p>Z</p>
-                <el-slider class="horizontal_slider" :min="-10000" :max="10000" v-model="tableInfo.translationZ"
-                    :step="0.5" @input="handleChange($event, 3)" />
+                <el-slider class="horizontal_slider" :min="-100" :max="100" v-model="tableInfo.translationZ" :step="0.5"
+                    @input="handleChange($event, 3)" />
             </div>
             <p class="label">旋转（度）：</p>
             <div class="item">
@@ -119,7 +119,7 @@
             </div>
             <div class="item">
                 <p>Z</p>
-                <el-slider class="horizontal_slider" :min="-360" :max="360" v-model="tableInfo.rotateZ" :step="0.5"
+                <el-slider class="horizontal_slider" :min="-360" :max="360" v-model="tableInfo.rotateZ" :step="0.1"
                     @input="handleChange($event, 9)" />
             </div>
         </div> -->
@@ -1214,7 +1214,7 @@ function getchangeModel(i: any, f?: any) {
     changeModelType.value = i;
     Web3DUtils.cesiumUtils.removePipe();
     Web3DUtils.cesiumUtils.removeAllCl();
-    Web3DUtils.cesiumUtils.init3dtilesetJSON()//清空
+    // Web3DUtils.cesiumUtils.init3dtilesetJSON()//清空
     closeClDialog();
 
     if (i == 0) {
@@ -1696,7 +1696,7 @@ const handleResetCompass = () => {
     } else {
         // if (reconstructionAllList.value.length) {
         //     let row: any = reconstructionAllList.value[0];
-        Web3DUtils.cesiumUtils.init3dtilesetJSON()
+        // Web3DUtils.cesiumUtils.init3dtilesetJSON()
         // }
     }
 };
@@ -1960,7 +1960,6 @@ function getRoadList() {
             res.scenes.forEach((e: any) => {
                 e.children.forEach((e2: any) => {
                     e2.children.forEach((e3: any) => {
-                        // e2.stage = Math.floor(Math.random() * 100) + 1;
                         if (e3.name.indexOf('k') != -1) {
                             tableData_road.value.push(e3);
                         }
@@ -1968,8 +1967,8 @@ function getRoadList() {
                 });
             });
 
-            Web3DUtils.cesiumUtils.init3dtilesetJSON();
-            Web3DUtils.cesiumUtils.init3dtilesetBoard(tableData_road.value);
+            getDetail();
+
         })
         .catch((err: any) => { });
 }
@@ -1993,22 +1992,41 @@ function handleChange(val: any, type: any) {
     // 获取旋转平移后的值
     Web3DUtils.cesiumUtils.realign3dTileset(tableInfo.value, value, type, (result) => {
         console.log(`The result is ${result}`);
-        // [1,0,0,0,0,1,0,0,0,0,1,0,-77169.34087948734,1037557.5408604145,-1594505.5402563005,1]
     });
     tableInfo.value.oldValue = val;
 }
 
-function getDetail(segment: any) {
+
+
+function getDetail(item?: any) {
     // status完成状态，整型，0:未完成;1:进行中;2已完成;
-    screenProgress({
-        segment
-    })
+    let params = {};
+    if (item) {
+        params = {
+            segment: item.name
+        }
+    }
+
+    screenProgress(params)
         .then((res: any) => {
-            roadInfo.value = res.data.data;
-            console.log(roadInfo.value, 'value')
-            roadDialogShow.value = true;
+            if (item) {
+                roadInfo.value = res.data.data;
+                roadDialogShow.value = true;
+            } else {
+                tableData_road.value.forEach((e: any) => {
+                    let data = res.data.data.find((i: any) => {
+                        return e.name == i.segment
+                    })
+                    if (data) {
+                        e.status = data.status;
+                    }
+                });
+
+                Web3DUtils.cesiumUtils.init3dtilesetJSON(tableData_road.value);
+                Web3DUtils.cesiumUtils.init3dtilesetBoard(tableData_road.value);
+            }
         })
-        .catch((err: any) => { });
+        .catch((err: any) => { console.log(err) });
 }
 
 
@@ -2044,7 +2062,7 @@ const initCesium = () => {
             Web3DUtils.cesiumUtils.clickRoadGetDetail(tableData_road.value, (id) => {
                 tableData_road.value.forEach((e: any, i: any) => {
                     if (e.id == id) {
-                        getDetail(e.name);
+                        getDetail(e);
                     }
                 });
 

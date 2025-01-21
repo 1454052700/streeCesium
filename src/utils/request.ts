@@ -6,7 +6,7 @@ export class Request {
     public static init() {
         // 创建axios实例
         this.axiosInstance = axios.create({
-            baseURL: '/api',
+            baseURL: '/streeApi',
             // timeout: 120000,//一分钟60000
             headers: {
                 'Authorization': 'Basic c2FiZXI6c2FiZXJfc2VjcmV0',

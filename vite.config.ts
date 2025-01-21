@@ -16,11 +16,11 @@ export default defineConfig({
     ],
     server: {
         proxy: {
-            "/api": {
+            "/streeApi": {
                 target: ip,
                 secure: false, // 请求是否为https
                 changeOrigin: true, // 是否跨域
-                rewrite: (path) => path.replace(/^\/api/, "")
+                rewrite: (path) => path.replace(/^\/streeApi/, "")
             },
             "/dgApi": {
                 target: "http://" + ip + ":18215/",//"http://120.237.115.74:18215/",http://47.238.143.171:18215/
